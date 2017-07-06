@@ -40,7 +40,7 @@ define_target "generators" do |target|
 		end
 		
 		define Rule, "generate.file" do
-			input :source_file
+			parameter :source_file
 			
 			output :destination_path
 			
@@ -50,11 +50,23 @@ define_target "generators" do |target|
 			apply do |arguments|
 				mkpath(File.dirname(arguments[:destination_path]))
 				
-				if substitutions = arguments[:substitutions]
+				if arguments[:destination_path].exist?
 					text = File.read(arguments[:source_file])
-					write(arguments[:destination_path], substitutions.apply(text))
+					
+					if substitutions = arguments[:substitutions]
+						text = substitutions.apply(text)
+					end
+					
+					merged = Build::Text::Merge::combine(arguments[:destination_path].read.lines, text.lines)
+					
+					write(arguments[:destination_path], merged.join)
 				else
-					cp(arguments[:source_file], arguments[:destination_path])
+					if substitutions = arguments[:substitutions]
+						text = File.read(arguments[:source_file])
+						write(arguments[:destination_path], substitutions.apply(text))
+					else
+						cp(arguments[:source_file], arguments[:destination_path])
+					end
 				end
 			end
 		end
