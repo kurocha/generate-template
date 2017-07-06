@@ -5,13 +5,13 @@
 
 teapot_version "2.0"
 
-define_target "generators" do |target|
+define_target "generate-template" do |target|
 	target.description = <<-EOF
 		Provides basic functionality for generating project files from templates.
 	EOF
 	
-	target.provides "Generate/Copy" do
-		define Rule, "generate.copy" do
+	target.provides "Generate/Template" do
+		define Rule, "generate.template" do
 			# The input prefix where template are copied from:
 			input :source, multiple: true
 			
@@ -51,6 +51,7 @@ define_target "generators" do |target|
 				mkpath(File.dirname(arguments[:destination_path]))
 				
 				if arguments[:destination_path].exist?
+					# Read the source file and merge it with the destination file if it exists:
 					text = File.read(arguments[:source_file])
 					
 					if substitutions = arguments[:substitutions]
@@ -61,6 +62,7 @@ define_target "generators" do |target|
 					
 					write(arguments[:destination_path], merged.join)
 				else
+					# Copy or write (if there are substitutions) the destination file:
 					if substitutions = arguments[:substitutions]
 						text = File.read(arguments[:source_file])
 						write(arguments[:destination_path], substitutions.apply(text))
