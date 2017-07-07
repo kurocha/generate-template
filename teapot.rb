@@ -58,7 +58,7 @@ define_target "generate-template" do |target|
 						text = substitutions.apply(text)
 					end
 					
-					merged = Build::Text::Merge::combine(text.lines, arguments[:destination_path].read.lines)
+					merged = Build::Text::Merge::combine(arguments[:destination_path].read.lines, text.lines)
 					
 					write(arguments[:destination_path], merged.join)
 				else
